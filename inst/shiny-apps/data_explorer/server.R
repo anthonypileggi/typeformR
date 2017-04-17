@@ -5,6 +5,12 @@ library(dplyr)
 library(DT)
 library(ggplot2)
 
+
+# Functions
+cleanTags <- function(htmlString) {
+  return(gsub("<.*?>", "", htmlString))
+}
+
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
@@ -26,7 +32,6 @@ shinyServer(function(input, output, session) {
                                           completed=TRUE)
 
     values$data <- typeformR::cleanData(values$data)
-    #names(values$data) <- qdap::bracketX(names(values$data), "angle")
 
     values$summary <- typeformR::summarizeData(values$data)
 
@@ -37,13 +42,14 @@ shinyServer(function(input, output, session) {
   # -- update selectInput for `survey_list`
   observeEvent(values$survey_list, {
     updateSelectInput(session, 'survey_name',
-                      choices = setNames(values$survey_list$name, qdap::bracketX(values$survey_list$name, "angle")))
+                      choices = setNames(values$survey_list$name, cleanTags(values$survey_list$name)))
   })
 
   # -- update selectInput for `question1`
   observeEvent(values$data, {
+    choice_list <- as.character(sapply(values$data, function(x) x$question))
     updateSelectizeInput(session, 'question1',
-                         choices = as.character(sapply(values$data, function(x) x$question)),
+                         choices = setNames(choice_list, cleanTags(choice_list)),
                          options = list(escape=FALSE))
   })
 
@@ -61,7 +67,7 @@ shinyServer(function(input, output, session) {
     values$simple_summary <- values$summary[[id]]
 
     # get associations w/ all other questions
-    values$assoc_summary <- data.frame(Question = names(out)[idc],
+    values$assoc_summary <- data.frame(Question = names(values$data)[idc],
                                        Pvalue = sapply(idc, function(x) typeformR::associationTest(values$data, id, x))) %>%
                               dplyr::filter(!is.na(Pvalue)) %>%
                               dplyr::arrange(Pvalue)
