@@ -103,7 +103,8 @@ shinyServer(function(input, output, session) {
   # Table: strongest associations
   output$assoc_table <- DT::renderDataTable({
     DT::datatable(req(values$assoc_summary),
-                  escape = TRUE,
+                  rownames=FALSE,
+                  escape = FALSE,
                   options = list(pageLength=10)) %>%
       DT::formatRound('Pvalue', digits=4) %>%
       DT::formatStyle("Pvalue", color = styleInterval(c(.05, .15), c("red", "orange", "black")))
