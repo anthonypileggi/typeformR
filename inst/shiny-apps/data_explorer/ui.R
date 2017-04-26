@@ -1,5 +1,9 @@
 # ui
 
+# note: source explicitly because getting an error on `plotlyOutput` without it
+source("global.R")
+
+
 shinyUI(fluidPage(
 
   useShinyjs(),
