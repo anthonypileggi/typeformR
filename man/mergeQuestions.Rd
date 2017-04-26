@@ -12,7 +12,8 @@ mergeQuestions(x, ids)
 \item{ids}{Vector of question indices}
 }
 \value{
-A data.frame with the merged data: {userid, value1, value2}
+A list containing {data, type, question}
+          data -- data.frame with the merged data: {userid, value1, value2}
 }
 \description{
 Merge user responses for three different questions

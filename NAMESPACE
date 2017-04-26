@@ -2,6 +2,7 @@
 
 export(associationTest)
 export(cleanData)
+export(getAssociations)
 export(mergeQuestions)
 export(plotTwoQuestions)
 export(runShinyApp)

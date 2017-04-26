@@ -18,7 +18,7 @@ plotTwoQuestions(x, id1, id2, levels1 = NULL, levels2 = NULL,
 
 \item{levels2}{Ordered factor levels for the second question}
 
-\item{plot_style}{Plot style ("bar", "grid")}
+\item{plot_style}{Plot style ("bar", "grid", "dot", "boxplot", "violin")}
 }
 \value{
 A plot
