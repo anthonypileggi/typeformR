@@ -1,16 +1,4 @@
-
-library(shiny)
-library(shinyjs)
-library(magrittr)
-library(dplyr)
-library(DT)
-library(ggplot2)
-library(plotly)
-
-# Functions
-cleanTags <- function(htmlString) {
-  return(gsub("<.*?>", "", htmlString))
-}
+# server
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {

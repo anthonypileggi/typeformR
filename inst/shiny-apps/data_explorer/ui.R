@@ -1,13 +1,4 @@
-library(shiny)
-library(shinyjs)
-
-## create
-textInputRow<-function (inputId, label, value = "")
-{
-  div(style="display:inline-block",
-    tags$label(label, `for` = inputId),
-    tags$input(id = inputId, type = "numeric", value = value,class="input-small"))
-}
+# ui
 
 shinyUI(fluidPage(
 
