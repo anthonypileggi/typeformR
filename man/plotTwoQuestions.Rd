@@ -5,7 +5,7 @@
 \title{Create a bi-variate plot that describes the results of two questions}
 \usage{
 plotTwoQuestions(x, id1, id2, levels1 = NULL, levels2 = NULL,
-  plot_style = "bar")
+  plot_style = NULL)
 }
 \arguments{
 \item{x}{List of data.frames, each with clean results for a single question}

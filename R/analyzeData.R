@@ -129,7 +129,7 @@ mergeQuestions <- function(x, ids) {
 #'  \item{\bold{dropdown/list vs. dropdown/list} -- faceted bar graph}
 #'  }
 #' @export
-plotTwoQuestions <- function (x, id1, id2, levels1=NULL, levels2=NULL, plot_style="bar") {
+plotTwoQuestions <- function (x, id1, id2, levels1=NULL, levels2=NULL, plot_style=NULL) {
 
   # merge responses
   xt <- typeformR::mergeQuestions(x, ids=c(id1, id2))
@@ -162,6 +162,11 @@ plotTwoQuestions <- function (x, id1, id2, levels1=NULL, levels2=NULL, plot_styl
 
   # - categorical vs. categorical
   if ( sum(xt$type %in% c("dropdown","list","yesno")) == 2 ) {
+
+    # default style = "bar" (if not set correctly)
+    if (is.null(plot_style) || !is.element(plot_style, c("grid","bar","dot"))) {
+      plot_style <- "bar"
+    }
 
     tmp <- xt$data %>% dplyr::group_by(value1) %>%
                       dplyr::mutate(respondents = dplyr::n_distinct(userid)) %>%
@@ -239,6 +244,11 @@ plotTwoQuestions <- function (x, id1, id2, levels1=NULL, levels2=NULL, plot_styl
 
     idx <- which(xt$type %in% c("dropdown","list","yesno"))
     idy <- which(xt$type %in% c("number", "opinionscale"))
+
+    # default plot_style = "boxplot" (if not set correctly)
+    if (is.null(plot_style) || !is.element(plot_style, c("boxplot","violin"))) {
+      plot_style <- "boxplot"
+    }
 
     if (plot_style == "boxplot") {
 
