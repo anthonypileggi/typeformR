@@ -1,6 +1,17 @@
 library(shiny)
+library(shinyjs)
+
+## create
+textInputRow<-function (inputId, label, value = "")
+{
+  div(style="display:inline-block",
+    tags$label(label, `for` = inputId),
+    tags$input(id = inputId, type = "numeric", value = value,class="input-small"))
+}
 
 shinyUI(fluidPage(
+
+  useShinyjs(),
 
   titlePanel("Typeform Data Explorer"),
 
@@ -22,7 +33,16 @@ shinyUI(fluidPage(
       tags$hr(),
       br(),
       h4("Survey Statistics:"),
-      htmlOutput("survey_stats")
+      htmlOutput("survey_stats"),
+      br(),
+      tags$hr(),
+      br(),
+      h4("Plot Options:"),
+      div(style="display:inline-block", numericInput('x_axis_text', "Text Size (x): ", value=10)),
+      div(style="display:inline-block", numericInput('y_axis_text', "Text Size (y): ", value=10)),
+      div(style="display:inline-block", numericInput('x_axis_label', "Label Size (x): ", value=14)),
+      div(style="display:inline-block", numericInput('y_axis_label', "Label Size (y): ", value=14))
+
     ),
 
 
@@ -31,11 +51,21 @@ shinyUI(fluidPage(
       h4("Step 3: Choose a question"),
       selectizeInput("question1", "Question:", choices=list(), options=list(escape=FALSE),
                      width="600px"),
-
       tabsetPanel(type = 'tabs',
-        tabPanel("Plot", plotOutput("plot1")),
+        tabPanel("Plot", plotOutput("plot1", height="600px")),
         tabPanel("Table", tableOutput("simple_table")),
-        tabPanel("Associations", dataTableOutput("assoc_table"))
+        tabPanel("Associations", dataTableOutput("assoc_table")),
+        tabPanel("Heatmap", htmlOutput("indexes"),
+                            plotlyOutput("heatmap", height="600px")),
+        tabPanel("Pairwise Plot",
+                 selectizeInput("question2", "Question 2:", choices=list(),
+                                options=list(escape=FALSE), width="600px"),
+                 selectInput("plot_style", "Plot Style: ",
+                             choices = list("Bar Graph" = "bar",
+                                            "Dot Plot" = "dot",
+                                            "Grid Plot" = "grid"),
+                             selected="bar"),
+                 plotOutput("plot2", height="600px"))
       )
     )
 
