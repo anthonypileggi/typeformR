@@ -6,6 +6,7 @@ shinyServer(function(input, output, session) {
   ## Reactive Values
   ##--------------------------------------------------------------------
   values <- reactiveValues()
+  values$current_status <- "Waiting for data..."
 
   # - collect available typeform surveys (given an api_key)
   observeEvent(input$fetch_surveys, {
@@ -15,21 +16,30 @@ shinyServer(function(input, output, session) {
 
   # - collect data for a specific survey
   observeEvent(input$fetch_data, {
-    cat("Collecting data for ", input$survey_name, "(ID = ",
-        values$survey_list$id[values$survey_list$name==input$survey_name], ")\n")
 
-    values$raw_data <- rtypeform::get_results(api=input$api_key,
-                                          uid=values$survey_list$id[values$survey_list$name==input$survey_name],
-                                          completed=TRUE)
+    withProgress(message = "Status: ",
+                 detail = "Collecting Data...",
+                 value = 0, {
 
-    values$data <- typeformR::cleanData(values$raw_data)
+      values$raw_data <- rtypeform::get_results(api=input$api_key,
+                                            uid=values$survey_list$id[values$survey_list$name==input$survey_name],
+                                            completed=TRUE)
 
-    values$summary <- typeformR::summarizeData(values$data)
+      incProgress(1/4, detail="Data cleaning...")
+      values$data <- typeformR::cleanData(values$raw_data)
 
-    values$associations <- typeformR::getAssociations(values$data)
+      incProgress(1/4, detail="Summarizing data...")
+      values$summary <- typeformR::summarizeData(values$data)
 
-    values$n_questions <- length(values$data)
-    values$n_respondents <- length(unique(do.call('c', lapply(values$data, function(x) x$results$userid))))
+      incProgress(1/4, detail="Computing question associations...")
+      values$associations <- typeformR::getAssociations(values$data)
+
+      incProgress(1/4, detail="Ready for analysis.")
+      values$current_status <- "<b>Ready for analysis.</b>"
+      values$n_questions <- length(values$data)
+      values$n_respondents <- length(unique(do.call('c', lapply(values$data, function(x) x$results$userid))))
+    })
+
   })
 
   # -- update selectInput for `survey_list`
@@ -130,7 +140,7 @@ shinyServer(function(input, output, session) {
 
   # -- heatmap click event
   observe ({
-    values$click <- event_data("plotly_click")
+    values$click <- plotly::event_data("plotly_click")
   })
 
   # -- update `question1` & `question2` when heatmap is clicked
@@ -194,7 +204,7 @@ shinyServer(function(input, output, session) {
 
   #--------------------------------------------------------------------------
 
-
+  #--------- TEXT OUTPUTS -------------------
   # General survey statistics
   output$survey_stats <- renderText({
       paste0("<b>",req(input$survey_name), "<br> <br>",
@@ -206,6 +216,11 @@ shinyServer(function(input, output, session) {
   output$indexes <- renderText({
     paste0("<b>Queston 1:</b>  ", req(values$id1), "<br>",
            "<b>Question 2:</b> ", req(values$id2))
+  })
+
+  # Status of data collection
+  output$status <- renderText({
+    values$current_status
   })
 
   #---------- PLOT OUTPUTS -------------------
