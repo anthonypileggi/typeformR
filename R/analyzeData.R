@@ -337,7 +337,6 @@ getAssociations <- function (data) {
   n <- length(data)
   assoc_summary <- NULL
   for (id in 1:n) {
-    cat(id, "\n")
 
     idc <- setdiff(1:n, id)
 
