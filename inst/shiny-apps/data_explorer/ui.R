@@ -23,7 +23,9 @@ shinyUI(fluidPage(
       br(),
       h4("Step 2: Choose a survey to analyze."),
       selectInput("survey_name", "Survey: ", choices=list()),
-      actionButton("fetch_data", "Get Survey Results", icon = icon("refresh")),
+      div(style="display:inline-block",
+          actionButton("fetch_data", "Get Survey Results", icon = icon("refresh"))),
+      div(style="display:inline-block", htmlOutput("status")),
       br(),
       tags$hr(),
       br(),
@@ -32,11 +34,15 @@ shinyUI(fluidPage(
       br(),
       tags$hr(),
       br(),
-      h4("Plot Options:"),
-      div(style="display:inline-block", numericInput('x_axis_text', "Text Size (x): ", value=10)),
-      div(style="display:inline-block", numericInput('y_axis_text', "Text Size (y): ", value=10)),
-      div(style="display:inline-block", numericInput('x_axis_label', "Label Size (x): ", value=14)),
-      div(style="display:inline-block", numericInput('y_axis_label', "Label Size (y): ", value=14))
+      tabsetPanel(type = 'tabs',
+          tabPanel("Plot Options",
+            div(style="display:inline-block", numericInput('x_axis_text', "Text Size (x): ", value=10)),
+            div(style="display:inline-block", numericInput('y_axis_text', "Text Size (y): ", value=10)),
+            div(style="display:inline-block", numericInput('x_axis_label', "Label Size (x): ", value=14)),
+            div(style="display:inline-block", numericInput('y_axis_label', "Label Size (y): ", value=14))
+          ),
+          tabPanel("Reorder Levels")
+      )
 
     ),
 
