@@ -41,7 +41,18 @@ shinyUI(fluidPage(
             div(style="display:inline-block", numericInput('x_axis_label', "Label Size (x): ", value=14)),
             div(style="display:inline-block", numericInput('y_axis_label', "Label Size (y): ", value=14))
           ),
-          tabPanel("Reorder Levels")
+          tabPanel("Reorder Levels",
+            h5("Input the levels in order (comma-separated):"),
+            p("Note: any levels not specified are pushed to the back."),
+            textAreaInput("new_levels", label=NULL, placeholder = "level1, level2, level3, ..."),
+            verbatimTextOutput("new_levels_text"),
+            div(style="display:inline-block",
+                actionButton("reorder_levels", "Reorder Levels", icon = icon("exchange"))
+            ),
+            div(style="display:inline-block",
+                actionButton("reorder_levels_byfreq", "Reorder By Frequency", icon = icon("line-chart"))
+            )
+          )
       )
 
     ),
