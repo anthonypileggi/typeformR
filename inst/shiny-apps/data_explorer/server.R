@@ -76,11 +76,15 @@ shinyServer(function(input, output, session) {
   })
   # if elements of the pairwise plot change
   updatePairwisePlot <- reactive({
-    list(values$id1, values$id2, input$plot_style)
+    list(values$id1, values$id2, input$plot_style, values$data[values$id1], values$data[values$id2])
   })
   # if global plot options change
   updatePlotOptions <- reactive({
     list(input$x_axis_text, input$y_axis_text, input$x_axis_label, input$y_axis_label)
+  })
+  # if anything about question 1 changes
+  updateQuestion1 <- reactive({
+    list(input$question1, values$id1, values$data[values$id1], values$summary[values$id1])
   })
 
   # -- store plot options of reactive values (after a delay, TODO check the delay is working)
@@ -94,10 +98,10 @@ shinyServer(function(input, output, session) {
   })
 
   # -- update summary data and associations for the selected question
-  observeEvent(input$question1, {
+  observeEvent(updateQuestion1(), {
 
     # check requirements
-    req(values$summary, values$n_questions, values$data)
+    req(values$summary, values$n_questions, values$data, values$id1)
 
     # identify the selected question
     id <- values$id1
@@ -105,7 +109,7 @@ shinyServer(function(input, output, session) {
 
     # - plot: simple descriptive statiistics (question 1)
     values$plot1 <-
-          ggplot(req(values$summary[[values$id1]]), aes(x=forcats::fct_reorder(Var1,Pct), y=Pct)) +
+          ggplot(req(values$summary[[values$id1]]), aes(x=Var1, y=Pct)) +
             geom_bar(stat="identity", fill='blue', alpha=.7) +
             labs(x=NULL, y="Percent") +
             scale_y_continuous(labels=scales::percent) +
@@ -119,7 +123,6 @@ shinyServer(function(input, output, session) {
                               dplyr::filter(question1 == names(values$data)[id]) %>%
                               dplyr::arrange(pvalue) %>%
                               dplyr::select(Question=question2, Pvalue=pvalue)
-
   })
 
 
@@ -159,12 +162,15 @@ shinyServer(function(input, output, session) {
     req(values$data, values$id1, values$id2)
 
     lev1 <- lev2 <- NULL
-    if (is.factor(values$data[[values$id1]]$results$value)) {
-      lev1 <- levels(forcats::fct_infreq(values$data[[values$id1]]$results$value))
+    if (1 == 0) {
+      if (is.factor(values$data[[values$id1]]$results$value)) {
+        lev1 <- levels(forcats::fct_infreq(values$data[[values$id1]]$results$value))
+      }
+      if (is.factor(values$data[[values$id2]]$results$value)) {
+        lev2 <- levels(forcats::fct_infreq(values$data[[values$id2]]$results$value))
+      }
     }
-    if (is.factor(values$data[[values$id2]]$results$value)) {
-      lev2 <- levels(forcats::fct_infreq(values$data[[values$id2]]$results$value))
-    }
+
     values$plot2 <- typeformR::plotTwoQuestions(values$data, values$id1, values$id2,
                                                 levels1 = lev1, levels2 = lev2,
                                                 plot_style = input$plot_style)
@@ -202,6 +208,34 @@ shinyServer(function(input, output, session) {
     }
   })
 
+  # -- update factor levels --
+  observeEvent(input$new_levels, {
+    req(values$data, values$id1)
+    values$new_levels <- strsplit(input$new_levels, split=",")[[1]]
+    cat("Current levels: ", levels(values$data[[values$id1]]$results$value), "\n")
+    cat("New Levels: ", values$new_levels, "\n")
+  })
+
+  observeEvent(input$reorder_levels, {
+    req(values$data, values$id1, values$new_levels)
+    # -- relevel variable
+    values$data[[values$id1]]$results$value <- forcats::fct_relevel(values$data[[values$id1]]$results$value,
+                                                                    values$new_levels)
+    # -- update summary
+    values$summary[values$id1] <- typeformR::summarizeData(values$data[values$id1])
+
+  })
+
+  observeEvent(input$reorder_levels_byfreq, {
+    req(values$data, values$id1)
+
+    # -- relevel variable
+    values$data[[values$id1]]$results$value <- forcats::fct_infreq(values$data[[values$id1]]$results$value)
+
+    # -- update summary
+    values$summary[values$id1] <- typeformR::summarizeData(values$data[values$id1])
+  })
+
   #--------------------------------------------------------------------------
 
   #--------- TEXT OUTPUTS -------------------
@@ -223,6 +257,10 @@ shinyServer(function(input, output, session) {
     values$current_status
   })
 
+  # New levels
+  output$new_levels_text <- renderText({
+    values$new_levels
+  })
   #---------- PLOT OUTPUTS -------------------
 
   # Plot: simple descriptive statistics
