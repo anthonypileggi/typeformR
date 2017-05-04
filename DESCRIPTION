@@ -13,4 +13,7 @@ Imports:
   magrittr,
   dplyr,
   ggplot2,
-  rtypeform
+  rtypeform,
+  forcats,
+  shiny,
+  tidyr
